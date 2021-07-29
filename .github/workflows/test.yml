@@ -29,4 +29,3 @@ jobs:
       # Runs a single command using the runners shell
       - name: build docker image
         run: ./build.sh
-        run: ls

@@ -36,6 +36,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: zops-reader
+          IMG_TAG: $(date +"%Y.%m.%d.%s")
         run: ./build.sh
   push:
 

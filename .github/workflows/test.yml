@@ -35,6 +35,7 @@ jobs:
         run: echo "IMG_TAG=$(date +"%Y.%m.%d.%s")" >> $GITHUB_ENV
 
       - name: Build, tag, and push image to Amazon ECR
+        id: login-ecr
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: zops-reader

@@ -42,7 +42,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: zops-reader
+          ECR_REPOSITORY: kinesis-analytics-lambdas/zops-reader
           IMG_TAG: ${{ env.IMG_TAG }}
         run: ./build.sh
 

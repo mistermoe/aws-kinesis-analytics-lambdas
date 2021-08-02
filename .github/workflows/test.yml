@@ -46,4 +46,5 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: zops-reader
           IMG_TAG: ${{ env.IMG_TAG }}
-        run: (echo production; echo y;) | ./build-scripts/build.sh
+          LAMBDA: ${{ github.event.release.tag_name }}
+        run: (echo $LAMBDA; echo y;) | ./build-scripts/build.sh

@@ -5,12 +5,10 @@ name: Build and Push
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
-  # push:
-  #   branches: [ master ]
+  push:
+    branches: [ master ]
   # pull_request:
   #   branches: [ master ]
-  release:
-    types: [ published ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -59,29 +57,29 @@ jobs:
           custom_tag: ${{ format('{0}_{1}', join(steps.get-changed-lambdas.outputs.result, '/'), env.DATETIME) }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create a GitHub release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+      # - name: Create a GitHub release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ steps.tag_version.outputs.new_tag }}
+      #     release_name: Release ${{ steps.tag_version.outputs.new_tag }}
+      #     body: ${{ steps.tag_version.outputs.changelog }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-east-1
       
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+      # - name: Login to Amazon ECR
+      #   id: login-ecr
+      #   uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push image(s) to Amazon ECR
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMG_TAG: ${{ env.DATETIME }}
-          LAMBDAS: ${{ env.get-changed-lambdas.outputs.result }}
-        run: echo $CHANGED_FILES | xargs -n 1 -I{} ./scripts/build-push.sh {}
+      # - name: Build, tag, and push image(s) to Amazon ECR
+      #   env:
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     IMG_TAG: ${{ env.DATETIME }}
+      #     LAMBDAS: ${{ env.get-changed-lambdas.outputs.result }}
+      #   run: echo $CHANGED_FILES | xargs -n 1 -I{} ./scripts/build-push.sh {}

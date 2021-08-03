@@ -88,4 +88,4 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMG_TAG: ${{ env.DATETIME }}
           LAMBDAS: ${{ steps.get-changed-lambdas.outputs.result }}
-        run: echo $CHANGED_FILES | xargs -n 1 -I{} ./scripts/build-push.sh {} y
+        run: echo $LAMBDAS | xargs -n 1 -I{} ./scripts/build-push.sh {} y

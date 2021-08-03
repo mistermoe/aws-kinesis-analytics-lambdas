@@ -5,8 +5,8 @@ name: Build and Push
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ master ]
+  # push:
+  #   branches: [ master ]
   # pull_request:
   #   branches: [ master ]
 
@@ -49,7 +49,6 @@ jobs:
             }
 
             return Array.from(lambdas).sort().join(' ')
-
 
       - name: Set date environment variable
         run: echo "DATETIME=$(date +"%Y.%m.%d")" >> $GITHUB_ENV

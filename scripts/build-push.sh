@@ -1,6 +1,9 @@
 #! /bin/bash
 
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo $CWD
+echo $1
+echo $2
 
 function contains() {
     local selection="$1"

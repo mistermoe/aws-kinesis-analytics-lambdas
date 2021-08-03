@@ -1,0 +1,17 @@
+name: Test Things
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test_things:
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone repo
+        with:
+          fetch-depth: 0
+        uses: actions/checkout@v2
+      - name: bap
+        env:
+          LAMBDAS: "preprocessor zops-reader"
+        run: echo $LAMBDAS

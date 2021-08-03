@@ -51,9 +51,13 @@ function prompt_push_img() {
 lambda_dirs=$(ls ./lambdas)
 lambdas=($lambda_dirs)
 lambda_prompt="Which lambda do you want to build an image for (${lambdas[@]})?"
-lambda=$(prompt_for_selection "$lambda_prompt" "${lambdas[@]}")
 
-IMG_TAG=$(date +"%Y.%m.%d.%s")
+if [ -z "$1" ]
+    then
+        lambda=$(prompt_for_selection "$lambda_prompt" "${lambdas[@]}")
+    else
+        lambda=$1
+fi
 
 docker build --no-cache \
     -f ${CWD}/../dockerfiles/python.Dockerfile \
@@ -61,7 +65,12 @@ docker build --no-cache \
     --build-arg lambda=$lambda \
     ${CWD}/../
 
-PUSH_IMG=$(prompt_push_img)
+if [ -z "$2" ]
+    then
+        PUSH_IMG=$(prompt_push_img)
+    else
+        PUSH_IMG=$2
+fi
 
 if [ $PUSH_IMG == "y" ]; then
     docker push ${ECR_REGISTRY}/kinesis-analytics-lambdas/${lambda}:$IMG_TAG

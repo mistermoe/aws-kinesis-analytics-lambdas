@@ -37,5 +37,5 @@ jobs:
         run: |
           for lambda in $LAMBDAS
           do
-            ./build-scripts $lambda y
+            ./scripts/build-push.sh $lambda y
           done

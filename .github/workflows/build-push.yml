@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get changed files since previous commit
-        run: echo "CHANGED_FILES=$(./scripts/test.sh)" >> $GITHUB_ENV
+        run: echo "CHANGED_FILES=$(./scripts/get-changed-files.sh)" >> $GITHUB_ENV
         
       - name: Get changed lambdas
         id: get-changed-lambdas
@@ -34,6 +34,7 @@ jobs:
         env:
           CHANGED_FILES: ${{ env.CHANGED_FILES }}
         with:
+          result-encoding: string
           script: |
             const changedFiles = process.env.CHANGED_FILES.split(' ');
             const lambdas = new Set([]);
@@ -45,41 +46,46 @@ jobs:
                 }
             }
 
-            return Array.from(lambdas).sort();
+            return Array.from(lambdas).sort().join(' ')
 
       - name: Set date environment variable
-        run: echo "DATETIME=$(date +"%Y.%m.%d.%s")" >> $GITHUB_ENV
+        run: echo "DATETIME=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
+      
+      - name: Set tag number
+        run: echo "TAG_NUM=$(git tag | wc -l)" >> $GITHUB_ENV
 
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v5.6
         with:
-          custom_tag: ${{ format('{0}_{1}', join(steps.get-changed-lambdas.outputs.result, '/'), env.DATETIME) }}
+          tag_prefix: ""
+          default_bump: false
+          custom_tag: ${{ format("{0}-{1}", env.DATETIME, env.TAG_NUM) }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Create a GitHub release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: ${{ steps.tag_version.outputs.new_tag }}
-      #     release_name: Release ${{ steps.tag_version.outputs.new_tag }}
-      #     body: ${{ steps.tag_version.outputs.changelog }}
+      - name: Create a GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ format("changes made to {0}", steps.get-changed-lambdas.outputs.result) }}
 
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: us-east-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
       
-      # - name: Login to Amazon ECR
-      #   id: login-ecr
-      #   uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      # - name: Build, tag, and push image(s) to Amazon ECR
-      #   env:
-      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     IMG_TAG: ${{ env.DATETIME }}
-      #     LAMBDAS: ${{ env.get-changed-lambdas.outputs.result }}
-      #   run: echo $CHANGED_FILES | xargs -n 1 -I{} ./scripts/build-push.sh {}
+      - name: Build, tag, and push image(s) to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMG_TAG: ${{ env.DATETIME }}
+          LAMBDAS: ${{ steps.get-changed-lambdas.outputs.result }}
+        run: echo $CHANGED_FILES | xargs -n 1 -I{} ./scripts/build-push.sh {} y

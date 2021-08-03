@@ -59,6 +59,8 @@ if [ -z "$1" ]
         lambda=$1
 fi
 
+IMG_TAG=${IMG_TAG-$(date +"%Y.%m.%d")}
+
 docker build --no-cache \
     -f ${CWD}/../dockerfiles/python.Dockerfile \
     -t ${ECR_REGISTRY}/kinesis-analytics-lambdas/${lambda}:$IMG_TAG \

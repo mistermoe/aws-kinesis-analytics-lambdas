@@ -34,4 +34,8 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMG_TAG: ${{ env.DATETIME }}
           LAMBDAS: preprocessor zops-reader
-        run: echo "${LAMBDAS}" | xargs -n 1 -d ' ' -t -I{} ./scripts/build-push.sh "{}" y
+        run: |
+          for lambda in $LAMBDAS
+          do
+            ./build-scripts $lambda y
+          done
